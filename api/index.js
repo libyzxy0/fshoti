@@ -42,11 +42,7 @@ app.get('/api', async (req, res) => {
   try {
    res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-   let apikey = req.query.apikey;
-   let apikeys = await readData('apikeys');
    let videos = await readData('videos');
-   let auth = apikeys.find((keys) => keys.apikey === apikey);
-   if (true) {
       let cookedData = {};
       async function generate() {
          let shuffledVideos1 = shuffle(videos);
@@ -58,7 +54,7 @@ app.get('/api', async (req, res) => {
          cookedData = {
             code: tt.error ? 500 : 200,
             url: tt.data.url,
-            username: tt.user && !tt.error ? tt.user.username : 'No user',
+            username: tt.user.unique_id,
          };
       }
       await generate();
@@ -67,11 +63,6 @@ app.get('/api', async (req, res) => {
          return;
       }
       res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
-   } else {
-      res.status(401).send({
-         error: 'Authenticate first'
-      });
-   }
    } catch (err) {
       res.send({ code: 500, error: err.message })
    }
