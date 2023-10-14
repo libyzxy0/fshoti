@@ -39,6 +39,7 @@ function shuffle(array) {
 }
 
 app.get('/api', async (req, res) => {
+  try {
    res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
    let apikey = req.query.apikey;
@@ -84,6 +85,9 @@ app.get('/api', async (req, res) => {
       res.status(401).send({
          error: 'Authenticate firsts'
       });
+   }
+   } catch (err) {
+      res.send({ code: 500, error: err.message })
    }
 })
 
