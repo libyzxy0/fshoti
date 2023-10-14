@@ -58,7 +58,7 @@ app.get('/api', async (req, res) => {
          cookedData = {
             code: tt.error ? 500 : 200,
             url: tt.data.url,
-            username: tt.user?.username,
+            username: tt.user && !tt.error ? tt.user.username : 'No user',
          };
       }
       await generate();
