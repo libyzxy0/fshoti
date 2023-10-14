@@ -53,7 +53,6 @@ app.get('/api', async (req, res) => {
          let shuffledVideos = shuffle(shuffledVideos1);
          //Randomly choose shuffled videos
          let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-         let sub_video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
          //====Randomizer End====
          let tt = await getVideoInfo(video.url);
 
@@ -69,7 +68,7 @@ app.get('/api', async (req, res) => {
                error: tt.data.error
             },
             user: {
-               username: tt.user.unique_id ? tt.user.unique_id : `Hello ${rd.username}, your requested source hasn't returned by the cdn.\n\nYou don't want to receive this error?, set 'refresh_error' option to true.`,
+               username: tt.user.unique_id ? tt.user.unique_id : `Hello ${auth.username}, your requested source hasn't returned by the cdn.\n\nYou don't want to receive this error?, set 'refresh_error' option to true.`,
                nickname: tt.user.nickname,
                id: tt.user.id,
             },
@@ -83,7 +82,7 @@ app.get('/api', async (req, res) => {
       res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
    } else {
       res.status(401).send({
-         error: 'Authenticate firsts'
+         error: 'Authenticate first'
       });
    }
    } catch (err) {
