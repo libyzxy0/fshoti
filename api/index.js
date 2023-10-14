@@ -46,7 +46,7 @@ app.get('/api', async (req, res) => {
    let apikeys = await readData('apikeys');
    let videos = await readData('videos');
    let auth = apikeys.find((keys) => keys.apikey === apikey);
-   if (auth) {
+   if (true) {
       let cookedData = {};
       async function generate() {
          let shuffledVideos1 = shuffle(videos);
@@ -55,23 +55,10 @@ app.get('/api', async (req, res) => {
          let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
          //====Randomizer End====
          let tt = await getVideoInfo(video.url);
-
          cookedData = {
             code: tt.error ? 500 : 200,
-            message: tt.error ? "error" : "success",
-            data: {
-               url: tt.data.url,
-               play: tt.data.play,
-               wmplay: tt.data.wmplay,
-               duration: tt.data.duration,
-               id: video.id,
-               error: tt.data.error
-            },
-            user: {
-               username: tt.user.unique_id ? tt.user.unique_id : `Hello ${auth.username}, your requested source hasn't returned by the cdn.\n\nYou don't want to receive this error?, set 'refresh_error' option to true.`,
-               nickname: tt.user.nickname,
-               id: tt.user.id,
-            },
+            url: tt.data.url,
+            username: tt.user?.username,
          };
       }
       await generate();
@@ -90,9 +77,6 @@ app.get('/api', async (req, res) => {
    }
 })
 
-app.get('*', (req, res) => {
-   res.redirect('https://shoti-api.libyzxy0.repl.co/');
-})
 app.listen(3000, () => {
    console.log(`App is listening on port 3000.`);
 })
