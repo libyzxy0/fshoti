@@ -60,7 +60,6 @@ function shuffle(array) {
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
-app.get('/cdn/:id', (req, res) => res.redirect('https://www.tikwm.com/video/media/hdplay/' + req.params.id + '.mp4'));
 
 app.get('/api', async (req, res) => {
   try {
@@ -72,7 +71,7 @@ app.get('/api', async (req, res) => {
     let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
 
     res.type('json').send(JSON.stringify({
-      url: 'https://fshoti.vercel.app/cdn/' + video.video_id,
+      url: 'https://www.tikwm.com/video/media/hdplay/' + video.video_id + '.mp4',
       username: video.username,
       nickname: video.nickname,
       title: video.title,
