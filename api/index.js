@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const tikwm = require('./tikwm');
 const {
@@ -56,7 +57,7 @@ function shuffle(array) {
   }
   return shuffledArray
 }
-
+app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
