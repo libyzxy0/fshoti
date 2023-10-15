@@ -3,9 +3,6 @@ const app = express();
 const {
    MongoClient
 } = require('mongodb');
-const {
-   getVideoInfo
-} = require('./tiktok-handler')
 const client = new MongoClient(process.env.MONGO_URI);
 
 (async function () {
@@ -42,27 +39,18 @@ app.get('/api', async (req, res) => {
   try {
    res.setHeader('Content-Type', 'application/json');
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-   let videos = await readData('videos');
-      let cookedData = {};
-      async function generate() {
-         let shuffledVideos1 = shuffle(videos);
-         let shuffledVideos = shuffle(shuffledVideos1);
-         //Randomly choose shuffled videos
-         let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-         //====Randomizer End====
-         let tt = await getVideoInfo(video.url);
-         cookedData = {
-            code: tt.error ? 500 : 200,
-            url: tt.data.url,
-            username: tt.user.unique_id,
-         };
-      }
-      await generate();
-      if (cookedData.code != 200) {
-         await generate();
-         return;
-      }
-      res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
+   let videos = await readData('shotis');
+      let shuffledVideos1 = shuffle(videos);
+      let shuffledVideos = shuffle(shuffledVideos1);
+      let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
+         
+      res.type('json').send(JSON.stringify({
+        url: 'https://shoti-api.libyzxy0.repl.co/video-cdn/' + video.video_id, 
+        usernane: video.username, 
+        nickname: video.nickname,
+        title: video.title,
+        duration: video.duration
+      }, null, 2) + '\n');
    } catch (err) {
       res.send({ code: 500, error: err.message })
    }
