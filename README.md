@@ -20,7 +20,7 @@ The result will look like this:
 ```json
 {
   "url": "htrps://example.com/video.mp4",
-  "usernane": "libyzxy0",
+  "username": "libyzxy0",
   "nickname": "Liby",
   "title": "Shoti everyday",
   "duration": 0

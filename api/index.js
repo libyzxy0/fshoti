@@ -46,7 +46,7 @@ app.get('/api', async (req, res) => {
          
       res.type('json').send(JSON.stringify({
         url: 'https://shoti-api.libyzxy0.repl.co/video-cdn/' + video.video_id, 
-        usernane: video.username, 
+        username: video.username, 
         nickname: video.nickname,
         title: video.title,
         duration: video.duration
