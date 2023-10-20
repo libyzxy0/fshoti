@@ -70,12 +70,13 @@ app.get('/api', async (req, res) => {
     let shuffledVideos1 = shuffle(videos);
     let shuffledVideos = shuffle(shuffledVideos1);
     let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-
+    let id = video.video_id;
+    let result = await tikwm.getVideoInfoV2(id);
     res.type('json').send(JSON.stringify({
-      url: 'https://www.tikwm.com/video/media/hdplay/' + video.video_id + '.mp4',
-      username: video.username,
-      nickname: video.nickname,
-      title: video.title,
+      url: result.data.hdplay,
+      username: result.data.author.unique_id,
+      nickname: result.data.author.nickname,
+      title: result.data.title,
       duration: video.duration
     }, null, 2) + '\n');
   } catch (err) {
@@ -85,7 +86,7 @@ app.get('/api', async (req, res) => {
 app.post('/api', async (req, res) => {
   try {
     let { authkey, url } = req.body;
-    let resu = await tikwm(url);
+    let resu = await tikwm.getVideoInfoV2(url);
     if (!!resu.data) {
       if (authkey != process.env.AUTHKEY) {
         res.send({ code: 401, message: 'who u' });

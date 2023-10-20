@@ -25,4 +25,26 @@ const getVideoInfo = async url => {
     return null
   }
 }
-module.exports = getVideoInfo;
+const getVideoInfoV2 = async (id) => {
+
+  const options = {
+    method: 'GET',
+    url: 'https://tiktok-video-no-watermark2.p.rapidapi.com/',
+    params: {
+      url: id,
+      hd: '1'
+    },
+    headers: {
+      'X-RapidAPI-Key': process.env.RAPID_API_KEY,
+      'X-RapidAPI-Host': 'tiktok-video-no-watermark2.p.rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await axios.request(options);
+    return response.data
+  } catch (error) {
+    return null
+  }
+}
+module.exports = { getVideoInfo, getVideoInfoV2 };
