@@ -66,47 +66,29 @@ app.get('/api', async (req, res) => {
   try {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-    let videos = await readData('shotis');
+    let videos = await readData('videos');
     let shuffledVideos1 = shuffle(videos);
     let shuffledVideos = shuffle(shuffledVideos1);
     let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-    let id = video.video_id;
-    let result = await tikwm.getVideoInfoV2(id);
+    let id = video.url;
+    let result = await tikwm.getVideoInfo(id);
     res.type('json').send(JSON.stringify({
-      url: result.data.hdplay,
-      username: result.data.author.unique_id,
-      nickname: result.data.author.nickname,
-      title: result.data.title,
-      duration: video.duration
+      code: 200,
+      message: 'success', 
+      data: {
+        region: result.data?.region,
+        url: "https://shoti-api.libyzxy0.repl.co/video-cdn/"+ result.data?.id,
+        cover: "http://tikwm.com/video/cover/" + result.data?.id + ".webp",
+        title: result.data?.title,
+        duration: result.data?.duration + "s", 
+        user: {
+          username: result.data.author.unique_id,
+          nickname: result.data.author.nickname,
+        }
+      }
     }, null, 2) + '\n');
   } catch (err) {
     res.send({ code: 500, error: err.message })
-  }
-})
-app.post('/api', async (req, res) => {
-  try {
-    let { authkey, url } = req.body;
-    let resu = await tikwm.getVideoInfoV2(url);
-    if (!!resu.data) {
-      if (authkey != process.env.AUTHKEY) {
-        res.send({ code: 401, message: 'who u' });
-      } else {
-        let r = await insertData({
-          id: resu.data.id,
-          usr: resu.data.author.id,
-          title: resu.data.title,
-          duration: resu.data.duration,
-          username: resu.data.author.unique_id,
-          nickname: resu.data.author.nickname
-        });
-        res.send({ code: 200, message: 'success' });
-      }
-    } else {
-      res.send({ code: 400, message: 'error' })
-    }
-  } catch (err) {
-    console.log(err)
-    res.send({ code: 500, message: 'server error' })
   }
 })
 
