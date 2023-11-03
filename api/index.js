@@ -83,19 +83,21 @@ app.post('/api/info', async (req, res) => {
 })
 
 app.post('/api/createkey', async (req, res) => {
+  try {
   const { username } = req.body;
+  console.log(username)
   const uniqueId = Date.now().toString(32) + Math.random().toString(32).substr(3);
-  writeData('apikeys', {
+  let rs = await writeData('apikeys', {
     username: username ? username : 'Unknown',
     apikey: `$shoti-${uniqueId}`,
     requests: 0,
     createdAt: new Date()
-  }).then(() => {
-    res.send({ success: true, apikey: '$shoti-' + uniqueId })
-  }).catch((err) => {
-    console.log(err);
-    res.send({ success: false })
   })
+  res.send({ success: true, apikey: '$shoti-' + uniqueId, username: rs })
+    
+ } catch (err) {
+    res.send({ success: false })
+ }
 })
 
 app.post('/api/v1/add', async (req, res) => {
@@ -153,6 +155,7 @@ app.post('/api/v1/get', async (req, res) => {
     let cookedData;
 
     async function generate() {
+      try {
       let videos = await readData('videos');
       let shuffledVideos1 = shuffle(videos);
       let shuffledVideos = shuffle(shuffledVideos1);
@@ -176,6 +179,9 @@ app.post('/api/v1/get', async (req, res) => {
         }
       }
       cookedData = data;
+      } catch (err) {
+        cookedData.code = 400;
+      }
     }
 
     await generate()
