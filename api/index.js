@@ -16,6 +16,17 @@ const client = new MongoClient(process.env.MONGO_URI);
   }
 })()
 
+async function writeData(col, data) {
+  try {
+    const database = client.db(process.env.DB_NAME);
+    const collection = database.collection(col);
+    const result = await collection.insertOne(data)
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function readData(col) {
   try {
     const database = client.db(process.env.DB_NAME);
@@ -40,7 +51,7 @@ async function updateData(col, dataID, newData) {
     console.log(error);
   }
 }
-                  
+
 function shuffle(array) {
   let shuffledArray = array.slice();
   for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -53,6 +64,39 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+app.post('/api/info', async (req, res) => {
+  let { f } = req.body;
+  console.log(f)
+  if (f == 'leaderboard') {
+    let apikeyList = await readData('apikeys');
+    apikeyList.sort((a, b) => b.requests - a.requests);
+    let top = apikeyList.slice(0, 100);
+    const final = top.filter(item => item.requests !== 0)
+    res.type('json').send(JSON.stringify(final, null, 2) + '\n');
+  } else if (f == 'count') {
+    let count = await readData('videos');
+    res.send({ count: count.length })
+  } else {
+    res.send({ msg: "method not allowed" })
+  }
+})
+
+app.post('/api/createkey', async (req, res) => {
+  const { username } = req.body;
+  const uniqueId = Date.now().toString(32) + Math.random().toString(32).substr(3);
+  writeData('apikeys', {
+    username: username,
+    apikey: `$shoti-${uniqueId}`,
+    requests: 0,
+    createdAt: new Date()
+  }).then(() => {
+    res.send({ success: true, apikey: '$shoti-' + uniqueId })
+  }).catch((err) => {
+    console.log(err);
+    res.send({ success: false })
+  })
+})
 
 app.post('/api/v1/get', async (req, res) => {
   let { apikey } = req.body;
@@ -68,7 +112,7 @@ app.post('/api/v1/get', async (req, res) => {
     keys.sort((a, b) => b.requests - a.requests);
     const top = keys.slice(0, 100);
     let rd = keys.find((key) => key.apikey === apikey);
-    if(!rd) {
+    if (!rd) {
       res.type('json').send(JSON.stringify({
         code: 401,
         message: "error-apikey-failed"
@@ -82,14 +126,14 @@ app.post('/api/v1/get', async (req, res) => {
     let result = await tikwm.getVideoInfo(id);
     res.type('json').send(JSON.stringify({
       code: 200,
-      message: 'success', 
+      message: 'success',
       data: {
-        _shoti_rank: rank, 
+        _shoti_rank: rank,
         region: result.data?.region,
-        url: "https://shoti-api.libyzxy0.repl.co/video-cdn/"+ result.data?.id,
+        url: "https://shoti-api.libyzxy0.repl.co/video-cdn/" + result.data?.id,
         cover: "http://tikwm.com/video/cover/" + result.data?.id + ".webp",
         title: result.data?.title,
-        duration: result.data?.duration + "s", 
+        duration: result.data?.duration + "s",
         user: {
           username: result.data.author.unique_id,
           nickname: result.data.author.nickname,
