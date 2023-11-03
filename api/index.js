@@ -98,16 +98,43 @@ app.post('/api/createkey', async (req, res) => {
   })
 })
 
+app.post('/api/v1/add', async (req, res) => {
+  try {
+  const { url, apikey } = req.body;
+  const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(3);
+  let videos = await readData('videos');
+  let apikeys = await readData('apikeys');
+  let v = videos.find((vid) => vid.url === url);
+  if(!v) {
+    res.send({ success: false })
+    return;
+  }
+  let k = apikeys.find((key) => key.apikey === apikey);
+  if(!k) {
+    res.send({ success: false })
+    return;
+  }
+  writeData('videos', {
+    url: url,
+    id: uniqueId,
+    addedDate: new Date()
+  }).then(() => {
+    res.send({ success: true, id: uniqueId })
+  }).catch((err) => {
+    console.log(err);
+    res.send({ success: false })
+  })
+  } catch (err) {
+    console.log(err);
+    res.send({ success: false });
+  }
+})
+    
 app.post('/api/v1/get', async (req, res) => {
   let { apikey } = req.body;
   try {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
-    let videos = await readData('videos');
-    let shuffledVideos1 = shuffle(videos);
-    let shuffledVideos = shuffle(shuffledVideos1);
-    let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-    let id = video.url;
     let keys = await readData('apikeys');
     keys.sort((a, b) => b.requests - a.requests);
     const top = keys.slice(0, 100);
@@ -115,7 +142,7 @@ app.post('/api/v1/get', async (req, res) => {
     if (!rd) {
       res.type('json').send(JSON.stringify({
         code: 401,
-        message: "error-apikey-failed"
+        message: "error-apikey-invalid"
       }, null, 2) + '\n');
       return;
     }
@@ -123,10 +150,18 @@ app.post('/api/v1/get', async (req, res) => {
       requests: rd.requests + 1,
     })
     const rank = top.findIndex(item => item.apikey === rd.apikey) + 1;
+    let cookedData;
+
+    async function generate() {
+      let videos = await readData('videos');
+    let shuffledVideos1 = shuffle(videos);
+    let shuffledVideos = shuffle(shuffledVideos1);
+    let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
+    let id = video.url;
     let result = await tikwm.getVideoInfo(id);
-    res.type('json').send(JSON.stringify({
-      code: 200,
-      message: 'success',
+    let data = {
+      code: result ? 200 : 400,
+      message: result ? 'success' : 'error',
       data: {
         _shoti_rank: rank,
         region: result.data?.region,
@@ -139,7 +174,18 @@ app.post('/api/v1/get', async (req, res) => {
           nickname: result.data.author.nickname,
         }
       }
-    }, null, 2) + '\n');
+    }
+    cookedData = data;
+    }
+    
+    await generate()
+    if(cookedData.code !== 200) {
+      await await generate();
+      return;
+      return
+    }
+    res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
+    
   } catch (err) {
     res.send({ code: 500, error: err.message })
   }
