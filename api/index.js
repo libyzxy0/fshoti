@@ -85,6 +85,10 @@ app.post('/api/info', async (req, res) => {
 app.post('/api/createkey', async (req, res) => {
   try {
   const { username } = req.body;
+  if(!username) {
+    res.send({ success: false })
+    return;
+  }
   console.log(username)
   const uniqueId = Date.now().toString(32) + Math.random().toString(32).substr(3);
   let rs = await writeData('apikeys', {
