@@ -86,7 +86,7 @@ app.post('/api/createkey', async (req, res) => {
   const { username } = req.body;
   const uniqueId = Date.now().toString(32) + Math.random().toString(32).substr(3);
   writeData('apikeys', {
-    username: username,
+    username: username ? username : 'Unknown',
     apikey: `$shoti-${uniqueId}`,
     requests: 0,
     createdAt: new Date()
@@ -100,36 +100,36 @@ app.post('/api/createkey', async (req, res) => {
 
 app.post('/api/v1/add', async (req, res) => {
   try {
-  const { url, apikey } = req.body;
-  const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(3);
-  let videos = await readData('videos');
-  let apikeys = await readData('apikeys');
-  let v = videos.find((vid) => vid.url === url);
-  if(!v) {
-    res.send({ success: false })
-    return;
-  }
-  let k = apikeys.find((key) => key.apikey === apikey);
-  if(!k) {
-    res.send({ success: false })
-    return;
-  }
-  writeData('videos', {
-    url: url,
-    id: uniqueId,
-    addedDate: new Date()
-  }).then(() => {
-    res.send({ success: true, id: uniqueId })
-  }).catch((err) => {
-    console.log(err);
-    res.send({ success: false })
-  })
+    const { url, apikey } = req.body;
+    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(3);
+    let videos = await readData('videos');
+    let apikeys = await readData('apikeys');
+    let v = videos.find((vid) => vid.url === url);
+    if (!v) {
+      res.send({ success: false })
+      return;
+    }
+    let k = apikeys.find((key) => key.apikey === apikey);
+    if (!k) {
+      res.send({ success: false })
+      return;
+    }
+    writeData('videos', {
+      url: url,
+      id: uniqueId,
+      addedDate: new Date()
+    }).then(() => {
+      res.send({ success: true, id: uniqueId })
+    }).catch((err) => {
+      console.log(err);
+      res.send({ success: false })
+    })
   } catch (err) {
     console.log(err);
     res.send({ success: false });
   }
 })
-    
+
 app.post('/api/v1/get', async (req, res) => {
   let { apikey } = req.body;
   try {
@@ -154,38 +154,38 @@ app.post('/api/v1/get', async (req, res) => {
 
     async function generate() {
       let videos = await readData('videos');
-    let shuffledVideos1 = shuffle(videos);
-    let shuffledVideos = shuffle(shuffledVideos1);
-    let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
-    let id = video.url;
-    let result = await tikwm.getVideoInfo(id);
-    let data = {
-      code: result ? 200 : 400,
-      message: result ? 'success' : 'error',
-      data: {
-        _shoti_rank: rank,
-        region: result.data?.region,
-        url: "https://shoti-api.libyzxy0.repl.co/video-cdn/" + result.data?.id,
-        cover: "http://tikwm.com/video/cover/" + result.data?.id + ".webp",
-        title: result.data?.title,
-        duration: result.data?.duration + "s",
-        user: {
-          username: result.data.author.unique_id,
-          nickname: result.data.author.nickname,
+      let shuffledVideos1 = shuffle(videos);
+      let shuffledVideos = shuffle(shuffledVideos1);
+      let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
+      let id = video.url;
+      let result = await tikwm.getVideoInfo(id);
+      let data = {
+        code: result ? 200 : 400,
+        message: result ? 'success' : 'error',
+        data: {
+          _shoti_rank: rank,
+          region: result.data?.region,
+          url: "https://shoti-api.libyzxy0.repl.co/video-cdn/" + result.data?.id,
+          cover: "http://tikwm.com/video/cover/" + result.data?.id + ".webp",
+          title: result.data?.title,
+          duration: result.data?.duration + "s",
+          user: {
+            username: result.data.author.unique_id,
+            nickname: result.data.author.nickname,
+          }
         }
       }
+      cookedData = data;
     }
-    cookedData = data;
-    }
-    
+
     await generate()
-    if(cookedData.code !== 200) {
+    if (cookedData.code !== 200) {
       await await generate();
       return;
       return
     }
     res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
-    
+
   } catch (err) {
     res.send({ code: 500, error: err.message })
   }
