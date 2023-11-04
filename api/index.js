@@ -67,16 +67,21 @@ app.use(express.static('public'));
 
 app.post('/api/info', async (req, res) => {
   let { f } = req.body;
+  let apikeyList = await readData('apikeys');
   console.log(f)
   if (f == 'leaderboard') {
-    let apikeyList = await readData('apikeys');
     apikeyList.sort((a, b) => b.requests - a.requests);
     let top = apikeyList.slice(0, 100);
     const final = top.filter(item => item.requests !== 0)
     res.type('json').send(JSON.stringify(final, null, 2) + '\n');
-  } else if (f == 'count') {
+  } else if (f == 'stats') {
     let count = await readData('videos');
-    res.send({ count: count.length })
+    const requests = apikeyList.reduce((accumulator, currentItem) => accumulator + currentItem.requests, 0);
+    res.send({ 
+      videos: count.length, 
+      users: apikeyList.length,
+      requests
+    })
   } else {
     res.send({ msg: "method not allowed" })
   }
