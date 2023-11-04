@@ -194,7 +194,7 @@ app.post('/api/v1/get', async (req, res) => {
     }
 
     await generate()
-    if (cookedData.code != 200) {
+    if (!cookedData && cookedData.code != 200) {
       await generate();
       return;
     }
