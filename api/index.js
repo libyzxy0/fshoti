@@ -189,7 +189,8 @@ app.post('/api/v1/get', async (req, res) => {
       }
         return data
       } catch (err) {
-        console.log(err)
+        console.log("ERROR:", rd.username + `#${rank}`)
+        await generate();
         return null
       }
     }
@@ -199,7 +200,7 @@ app.post('/api/v1/get', async (req, res) => {
       cookedData = rst;
       console.log('GET-SHOTI:', rd.username + `#${rank}`);
     }
-    if (!rst && rst.code != 200) {
+    if (!rst || rst.code !== 200) {
       console.log("Error:", rst)
       async function gen() {
         let rst1 = await generate();
