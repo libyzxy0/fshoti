@@ -166,8 +166,7 @@ app.post('/api/v1/get', async (req, res) => {
     async function generate() {
       try {
       let videos = await readData('videos');
-      let shuffledVideos1 = shuffle(videos);
-      let shuffledVideos = shuffle(shuffledVideos1);
+      let shuffledVideos = shuffle(videos);
       let video = shuffledVideos[Math.floor(shuffledVideos.length * Math.random())];
       let id = video.url;
       let result = await tikwm.getVideoInfo(id);
@@ -189,7 +188,7 @@ app.post('/api/v1/get', async (req, res) => {
       }
         return data
       } catch (err) {
-        console.log("ERROR:", rd.username + `#${rank}`)
+        console.log("ERROR:", rd.username + `#${rank}`);
         await generate();
         return null
       }
