@@ -79,16 +79,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.post('/api/info', async (req, res) => {
-  let { method } = req.body;
+  let { f: method } = req.body;
   let apikeyList = await readData('apikeys');
   console.log(method);
 
-  if (method === 'leaderboard') {
+  if (method == 'leaderboard') {
     apikeyList.sort((a, b) => b.requests - a.requests);
     let top = apikeyList.slice(0, 100);
     const final = top.filter(item => item.requests !== 0);
     res.type('json').send(JSON.stringify(final, null, 2) + '\n');
-  } else if (method === 'stats') {
+  } else if (method == 'stats') {
     let videoCount = await readData('videos');
     const totalRequests = apikeyList.reduce((accumulator, currentItem) => accumulator + currentItem.requests, 0);
     res.send({
