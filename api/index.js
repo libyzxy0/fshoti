@@ -187,15 +187,25 @@ app.post('/api/v1/get', async (req, res) => {
           }
         }
       }
-      cookedData = data;
+        return data
       } catch (err) {
-        cookedData.code = 400;
+        console.log(err)
+        return null
       }
     }
 
-    await generate()
-    if (!cookedData && cookedData.code != 200) {
-      await generate();
+    let rst = await generate();
+    if(rst) {
+      cookedData = rst;
+      console.log('GET-SHOTI:', rd.username + `#${rank}`);
+    }
+    if (!rst && rst.code != 200) {
+      console.log("Error:", rst)
+      async function gen() {
+        let rst1 = await generate();
+         cookedData = rst1;
+      }
+      gen()
       return;
     }
     res.type('json').send(JSON.stringify(cookedData, null, 2) + '\n');
