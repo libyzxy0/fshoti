@@ -5,7 +5,7 @@ const tikwm = require('./tikwm');
 const { MongoClient } = require('mongodb');
 const client = new MongoClient(process.env.MONGO_URI);
 
-(async function () {
+(async function() {
   try {
     await client.connect();
     console.log('Connected to MongoDB');
@@ -76,8 +76,10 @@ function getRandomInt(min, max) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
+app.get('/', (req, res) => {
+  res.send("Shoti API > See documentation at https://shoti-api.vercel.app")
+})
 app.post('/api/info', async (req, res) => {
   let { f: method } = req.body;
   let apikeyList = await readData('apikeys');

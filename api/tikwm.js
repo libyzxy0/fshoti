@@ -2,14 +2,14 @@ const axios = require('axios');
 const spdy = require('spdy');
 
 const agent = spdy.createAgent({
-  host: 'www.tikwm.com', // Set the host here
-  port: 443, // Use the appropriate port
-  rejectUnauthorized: false, // You can adjust this option based on your needs
+  host: 'www.tikwm.com',
+  port: 443,
+  rejectUnauthorized: false,
 });
 
 const instance = axios.create({
   baseURL: 'https://www.tikwm.com',
-  httpAgent: agent, // Use the created HTTP/2 agent
+  httpAgent: agent,
   headers: {
     'accept': 'application/json, text/javascript, */*; q=0.01',
     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -20,7 +20,7 @@ const instance = axios.create({
     count: 12,
     cursor: 0,
     web: 1,
-    hd: 1
+    hd: 5
   }
 });
 
