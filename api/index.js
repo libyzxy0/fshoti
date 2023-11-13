@@ -88,7 +88,14 @@ app.post('/api/info', async (req, res) => {
   if (method == 'leaderboard') {
     apikeyList.sort((a, b) => b.requests - a.requests);
     let top = apikeyList.slice(0, 100);
-    const final = top.filter(item => item.requests !== 0);
+    const fin = top.filter(item => item.requests !== 0);
+    let final = [];
+    for(let i = 0;i < fin.length;i++) {
+      final.push({
+        username: fin[i].username,
+        requests: fin[i].requests
+      })
+    }
     res.type('json').send(JSON.stringify(final, null, 2) + '\n');
   } else if (method == 'stats') {
     let videoCount = await readData('videos');
