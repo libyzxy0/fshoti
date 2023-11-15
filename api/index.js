@@ -251,8 +251,8 @@ async function generateVideo(apikey, userRank) {
       data: {
         _shoti_rank: userRank,
         region: videoInfo.data?.region,
-        url: 'https://shoti-api.libyzxy0.repl.co/video-cdn/' + videoInfo.data?.id,
-        cover: 'http://tikwm.com/video/cover/' + videoInfo.data?.id + '.webp',
+        url: 'https://cdn-shotiapi.libyzxy0.xyz/video-cdn/' + videoInfo.data?.id,
+        cover: 'https://cdn-shotiapi.libyzxy0.xyz/cv/' + videoInfo.data?.id,
         title: videoInfo.data?.title,
         duration: videoInfo.data?.duration + 's',
         user: {
