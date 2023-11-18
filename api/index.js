@@ -177,7 +177,6 @@ const cache = {
 const mutex = {
   apikeyLock: false,
 };
-
 app.post('/api/v1/get', async (req, res) => {
   try {
     const { apikey } = req.body;
@@ -192,7 +191,6 @@ app.post('/api/v1/get', async (req, res) => {
 
     // Use a mutex to prevent concurrent access to apiKeyData
     if (mutex.apikeyLock) {
-      // Handle the case when another request is already accessing the apiKeyData
       return res.status(429).json({
         code: 429,
         message: 'Concurrent request, please try again later',
@@ -200,30 +198,34 @@ app.post('/api/v1/get', async (req, res) => {
     }
 
     mutex.apikeyLock = true;
-    const apiKeyData = apikeys.find((key) => key.apikey === apikey);
-    mutex.apikeyLock = false;
+    try {
+      const apiKeyData = apikeys.find((key) => key.apikey === apikey);
 
-    if (!apiKeyData) {
-      return res.status(401).json({
-        code: 401,
-        message: 'error-apikey-invalid',
+      if (!apiKeyData) {
+        return res.status(401).json({
+          code: 401,
+          message: 'error-apikey-invalid',
+        });
+      }
+
+      await updateData('apikeys', apiKeyData._id, {
+        requests: apiKeyData.requests + 1,
       });
+
+      const userRank = topUsers.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
+
+      const videoResponse = await generateVideo(userRank);
+
+      if (!videoResponse || videoResponse.code !== 200) {
+        console.error('Error:', videoResponse);
+        const retryResponse = await generateVideo(userRank);
+        return res.status(retryResponse.code).json(retryResponse);
+      }
+
+      return res.status(200).json(videoResponse);
+    } finally {
+      mutex.apikeyLock = false;
     }
-
-    await updateData('apikeys', apiKeyData._id, {
-      requests: apiKeyData.requests + 1,
-    });
-
-    const userRank = topUsers.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
-
-    const videoResponse = await generateVideo(userRank);
-
-    if (!videoResponse || videoResponse.code !== 200) {
-      console.error('Error:', videoResponse);
-      const retryResponse = await generateVideo(userRank);
-      return res.status(retryResponse.code).json(retryResponse);
-    }
-    return res.status(200).json(videoResponse);
   } catch (err) {
     console.error('Error:', err);
     return res.status(500).json({ code: 500, error: err.message });
