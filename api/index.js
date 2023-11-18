@@ -263,7 +263,7 @@ async function generateVideo(userRank) {
     };
   } catch (err) {
     console.error('🔁 Retry');
-    return generateVideo(apikey, userRank);
+    return generateVideo(userRank);
   }
 }
 
