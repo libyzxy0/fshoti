@@ -213,15 +213,14 @@ app.post('/api/v1/get', async (req, res) => {
     await updateData('apikeys', apiKeyData._id, {
       requests: apiKeyData.requests + 1,
     });
-    console.log(`✔️ ${apikeyData.username}`);
 
     const userRank = topUsers.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
 
-    const videoResponse = await generateVideo(apikey, userRank);
+    const videoResponse = await generateVideo(userRank);
 
     if (!videoResponse || videoResponse.code !== 200) {
       console.error('Error:', videoResponse);
-      const retryResponse = await generateVideo(apikey, userRank);
+      const retryResponse = await generateVideo(userRank);
       return res.status(retryResponse.code).json(retryResponse);
     }
     return res.status(200).json(videoResponse);
@@ -231,7 +230,8 @@ app.post('/api/v1/get', async (req, res) => {
   }
 });
 
-async function generateVideo(apikey, userRank) {
+async function generateVideo(userRank) {
+  console.log(`✔️ ${userRank}`);
   if (!cache.videos) {
     cache.videos = await readData('videos');
   }
