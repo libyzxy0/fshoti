@@ -213,6 +213,7 @@ app.post('/api/v1/get', async (req, res) => {
     await updateData('apikeys', apiKeyData._id, {
       requests: apiKeyData.requests + 1,
     });
+    console.log(`✔️ ${apikeyData.username}`);
 
     const userRank = topUsers.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
 
@@ -223,7 +224,6 @@ app.post('/api/v1/get', async (req, res) => {
       const retryResponse = await generateVideo(apikey, userRank);
       return res.status(retryResponse.code).json(retryResponse);
     }
-    console.log(`✔️ ${apikeyData.username}`);
     return res.status(200).json(videoResponse);
   } catch (err) {
     console.error('Error:', err);
