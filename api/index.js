@@ -208,6 +208,7 @@ app.post('/api/v1/get', async (req, res) => {
         });
       }
 
+      // Use await for the asynchronous update operation
       await updateData('apikeys', apiKeyData._id, {
         requests: apiKeyData.requests + 1,
       });
@@ -231,6 +232,7 @@ app.post('/api/v1/get', async (req, res) => {
     return res.status(500).json({ code: 500, error: err.message });
   }
 });
+
 
 async function generateVideo(userRank) {
   console.log(`✔️ ${userRank}`);
