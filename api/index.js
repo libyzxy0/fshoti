@@ -223,7 +223,7 @@ app.post('/api/v1/get', async (req, res) => {
       const retryResponse = await generateVideo(apikey, userRank);
       return res.status(retryResponse.code).json(retryResponse);
     }
-
+    console.log(`✔️ ${apikeyData.username}`);
     return res.status(200).json(videoResponse);
   } catch (err) {
     console.error('Error:', err);
@@ -262,7 +262,7 @@ async function generateVideo(apikey, userRank) {
       },
     };
   } catch (err) {
-    console.error('Regenerating...');
+    console.error('🔁 Retry');
     return generateVideo(apikey, userRank);
   }
 }
