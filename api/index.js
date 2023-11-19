@@ -46,6 +46,17 @@ async function updateData(collection, dataID, newData) {
   } catch (error) {
     console.log(error);
   }
+};
+
+async function deleteData(collection, dataID) {
+    try {
+      const database = client.db(process.env.DB_NAME);
+      const col = database.collection(collection);
+      const result = await col.deleteOne({ _id: dataID });
+      return result;
+    } catch (error) {
+      console.log(error);
+    }
 }
 
 function shuffle(array) {
@@ -194,7 +205,9 @@ app.post('/api/v1/get', async (req, res) => {
     const videoResponse = await generateVideo(userRank);
 
     if (!videoResponse || videoResponse.code !== 200) {
-      console.error('Error:', videoResponse);
+      await deleteData('videos', videoResponse.errID).then(r => {
+        console.error('ErrorVidDel:', r);
+      })
       const retryResponse = await generateVideo(userRank);
       return res.status(retryResponse.code).json(retryResponse);
     }
@@ -219,13 +232,13 @@ async function generateVideo(userRank) {
   const randomIndex = getRandomInt(0, shuffledVideos.length - 1);
   const randomVideo = shuffledVideos[randomIndex];
   const videoId = randomVideo.url;
-
   try {
     const videoInfo = await tikwm.getVideoInfo(videoId);
-
+    
     return {
-      code: videoInfo ? 200 : 400,
-      message: videoInfo ? 'success' : 'error',
+      code: videoInfo.data ? 200 : 400,
+      message: videoInfo.data ? 'success' : 'error',
+      errID: !videoInfo.data ? randomVideo._id : false,
       data: {
         _shoti_rank: userRank,
         region: videoInfo.data?.region,
@@ -234,14 +247,14 @@ async function generateVideo(userRank) {
         title: videoInfo.data?.title,
         duration: videoInfo.data?.duration + 's',
         user: {
-          username: videoInfo.data.author.unique_id,
-          nickname: videoInfo.data.author.nickname,
+          username: videoInfo?.data?.author.unique_id,
+          nickname: videoInfo?.data?.author.nickname,
         },
       },
     };
   } catch (err) {
-    console.error('🔁 Retry');
-    return generateVideo(userRank);
+    console.error(err);
+    return await generateVideo(userRank);
   }
 }
 
