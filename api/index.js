@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const tikwm = require('./tikwm');
+const cache = require('memory-cache');
 const { MongoClient } = require('mongodb');
 const client = new MongoClient(process.env.MONGO_URI);
 
@@ -112,7 +113,7 @@ app.post('/api/info', async (req, res) => {
 
 app.post('/api/createkey', async (req, res) => {
   try {
-    const { username } = req.body;
+    const { username, token } = req.body;
     if (!username) {
       res.send({ success: false });
       return;
@@ -169,64 +170,36 @@ app.post('/api/v1/add', async (req, res) => {
   }
 });
 
-const cache = {
-  apikeys: null,
-  videos: null,
-};
-
-const mutex = {
-  apikeyLock: false,
-};
 app.post('/api/v1/get', async (req, res) => {
   try {
     const { apikey } = req.body;
+    let apikeys =  await readData('apikeys');
 
-    if (!cache.apikeys) {
-      cache.apikeys = await readData('apikeys');
+    const apiKeyData = apikeys.find((key) => key.apikey === apikey);
+
+    if (!apiKeyData) {
+      return res.status(401).json({
+        code: 401,
+        message: 'error-apikey-invalid',
+      });
     }
 
-    const apikeys = cache.apikeys;
+    await updateData('apikeys', apiKeyData._id, {
+      requests: apiKeyData.requests + 1,
+    });
     apikeys.sort((a, b) => b.requests - a.requests);
-    const topUsers = apikeys.slice(0, 100);
+    console.log(`✔️  :${apiKeyData.username}`);
+    const userRank = apikeys.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
 
-    // Use a mutex to prevent concurrent access to apiKeyData
-    if (mutex.apikeyLock) {
-      return res.status(429).json({
-        code: 429,
-        message: 'Concurrent request, please try again later',
-      });
+    const videoResponse = await generateVideo(userRank);
+
+    if (!videoResponse || videoResponse.code !== 200) {
+      console.error('Error:', videoResponse);
+      const retryResponse = await generateVideo(userRank);
+      return res.status(retryResponse.code).json(retryResponse);
     }
 
-    mutex.apikeyLock = true;
-    try {
-      const apiKeyData = apikeys.find((key) => key.apikey === apikey);
-
-      if (!apiKeyData) {
-        return res.status(401).json({
-          code: 401,
-          message: 'error-apikey-invalid',
-        });
-      }
-
-      // Use await for the asynchronous update operation
-      await updateData('apikeys', apiKeyData._id, {
-        requests: apiKeyData.requests + 1,
-      });
-
-      const userRank = topUsers.findIndex((item) => item.apikey === apiKeyData.apikey) + 1;
-
-      const videoResponse = await generateVideo(userRank);
-
-      if (!videoResponse || videoResponse.code !== 200) {
-        console.error('Error:', videoResponse);
-        const retryResponse = await generateVideo(userRank);
-        return res.status(retryResponse.code).json(retryResponse);
-      }
-
-      return res.status(200).json(videoResponse);
-    } finally {
-      mutex.apikeyLock = false;
-    }
+    return res.status(200).json(videoResponse);
   } catch (err) {
     console.error('Error:', err);
     return res.status(500).json({ code: 500, error: err.message });
@@ -235,12 +208,13 @@ app.post('/api/v1/get', async (req, res) => {
 
 
 async function generateVideo(userRank) {
-  console.log(`✔️ ${userRank}`);
-  if (!cache.videos) {
-    cache.videos = await readData('videos');
+  let videos = cache.get('videos');
+
+  if (!videos) {
+    videos = await readData('videos');
+    cache.put('videos', videos);
   }
 
-  const videos = cache.videos;
   const shuffledVideos = shuffle(videos);
   const randomIndex = getRandomInt(0, shuffledVideos.length - 1);
   const randomVideo = shuffledVideos[randomIndex];
