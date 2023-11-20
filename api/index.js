@@ -6,7 +6,7 @@ const cache = require('memory-cache');
 const { MongoClient } = require('mongodb');
 const client = new MongoClient(process.env.MONGO_URI);
 
-const sub = "https://file-api.libyzxy0.repl.co/download/download%20(1).mp4";
+const sub = "";
 
 (async function() {
   try {
