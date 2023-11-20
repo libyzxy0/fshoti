@@ -6,6 +6,8 @@ const cache = require('memory-cache');
 const { MongoClient } = require('mongodb');
 const client = new MongoClient(process.env.MONGO_URI);
 
+const sub = "https://file-api.libyzxy0.repl.co/download/download%20(1).mp4";
+
 (async function() {
   try {
     await client.connect();
@@ -89,7 +91,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.send("Shoti API > See documentation at https://shoti-api.vercel.app")
 })
 app.post('/api/info', async (req, res) => {
@@ -242,7 +244,7 @@ async function generateVideo(userRank) {
       data: {
         _shoti_rank: userRank,
         region: videoInfo.data?.region,
-        url: 'https://cdn-shotiapi.libyzxy0.xyz/video-cdn/' + videoInfo.data?.id,
+        url: sub ? sub : 'https://cdn-shotiapi.libyzxy0.xyz/video-cdn/' + videoInfo.data?.id,
         cover: 'https://cdn-shotiapi.libyzxy0.xyz/cv/' + videoInfo.data?.id,
         title: videoInfo.data?.title,
         duration: videoInfo.data?.duration + 's',
