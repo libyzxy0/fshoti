@@ -251,7 +251,7 @@ async function generateVideo(userRank) {
         user: {
           username: videoInfo?.data?.author.unique_id,
           nickname: videoInfo?.data?.author.nickname,
-          userID: JSON.stringify(videoInfo?.data?.author)
+          userID: videoInfo?.data?.author.id
         },
       },
     };
