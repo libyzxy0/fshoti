@@ -221,7 +221,7 @@ app.post('/api/v1/get', async (req, res) => {
   }
 });
 
-app.get('/', async (req, res) => {
+app.get('/v1/request-without-key', async (req, res) => {
   let userRank = "ERR_METHOD_NOT_REQUIRE_KEY";
   const videoResponse = await generateVideo(userRank);
 
