@@ -221,6 +221,20 @@ app.post('/api/v1/get', async (req, res) => {
   }
 });
 
+app.get('/', async (req, res) => {
+  let userRank = "ERR_METHOD_NOT_REQUIRE_KEY";
+  const videoResponse = await generateVideo(userRank);
+
+    if (!videoResponse || videoResponse.code !== 200) {
+      await deleteData('videos', videoResponse.errID).then(r => {
+        console.error('ErrorVidDel:', r);
+      })
+      const retryResponse = await generateVideo(userRank);
+      return res.status(retryResponse.code).json(retryResponse);
+    }
+
+    return res.status(200).json(videoResponse);
+}) 
 
 async function generateVideo(userRank) {
   let videos = cache.get('videos');
