@@ -230,10 +230,9 @@ app.get('/api/v1/request-f', async (req, res) => {
         console.error('ErrorVidDel:', r);
       })
       const retryResponse = await generateVideo(userRank);
-      return res.status(retryResponse.code).json(retryResponse);
+      return res.type('json').send(JSON.stringify(retryResponse, null, 2) + '\n');
     }
-
-    return res.status(200).json(videoResponse);
+    return res.type('json').send(JSON.stringify(videoResponse, null, 2) + '\n');
 }) 
 
 async function generateVideo(userRank) {
