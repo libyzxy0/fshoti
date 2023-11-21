@@ -207,9 +207,9 @@ app.post('/api/v1/get', async (req, res) => {
     const videoResponse = await generateVideo(userRank);
 
     if (!videoResponse || videoResponse.code !== 200) {
-      await deleteData('videos', videoResponse.errID).then(r => {
-        console.error('ErrorVidDel:', r);
-      })
+    //  await deleteData('videos', videoResponse.errID).then(r => {
+    //    console.error('ErrorVidDel:', r);
+    //  })
       const retryResponse = await generateVideo(userRank);
       return res.status(retryResponse.code).json(retryResponse);
     }
@@ -226,9 +226,9 @@ app.get('/api/v1/request-f', async (req, res) => {
   const videoResponse = await generateVideo(userRank);
 
     if (!videoResponse || videoResponse.code !== 200) {
-      await deleteData('videos', videoResponse.errID).then(r => {
-        console.error('ErrorVidDel:', r);
-      })
+    //  await deleteData('videos', videoResponse.errID).then(r => {
+    //   console.error('ErrorVidDel:', r);
+    //  })
       const retryResponse = await generateVideo(userRank);
       return res.type('json').send(JSON.stringify(retryResponse, null, 2) + '\n');
     }
