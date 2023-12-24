@@ -257,7 +257,7 @@ async function generateVideo(userRank) {
       data: {
         _shoti_rank: userRank,
         region: videoInfo.data?.region,
-        url: sub ? sub : 'https://cdn-shotiapi.libyzxy0.xyz/video-cdn/' + videoInfo.data?.id,
+        url: sub ? sub : 'https://www.tikwm.com/video/media/hdplay/' + videoInfo.data?.id + '.mp4',
         cover: 'https://cdn-shotiapi.libyzxy0.xyz/cv/' + videoInfo.data?.id,
         title: videoInfo.data?.title,
         duration: videoInfo.data?.duration + 's',
